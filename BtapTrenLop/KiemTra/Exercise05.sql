@@ -145,7 +145,47 @@ GROUP BY a.name
 HAVING SUM(d.benefit) > 25;
 
 -- Tìm tổng số công nhân đã tham gia ở mỗi công trình
-SELECT b.name AS building_name, COUNT(w.worker_id) AS total_worker
+SELECT b.name AS building_name, COUNT(DISTINCT w.id) AS total_workers
 FROM building b
-JOIN work w ON b.id = w.building_id
+JOIN work wo ON b.id = wo.building_id
+JOIN worker w ON wo.worker_id = w.id
 GROUP BY b.name;
+
+-- Tìm tên và địa chỉ công trình có tổng số công nhân tham gia nhiều nhất
+SELECT b.name AS building_name, b.address AS building_address, COUNT(DISTINCT w.id) AS total_workers
+FROM building b
+JOIN work wo ON b.id = wo.building_id
+JOIN worker w ON wo.worker_id = w.id
+GROUP BY b.id
+ORDER BY total_workers DESC
+LIMIT 1;
+
+-- Cho biêt tên các thành phố và kinh phí trung bình cho mỗi công trình của từng thành phố tương ứng
+SELECT b.city AS city_name, AVG(b.cost) AS average_cost
+FROM building b
+GROUP BY b.city;
+
+-- Cho biết họ tên các công nhân có tổng số ngày tham gia vào các công trình lớn hơn tổng số ngày tham gia của công nhân Nguyễn Hồng Vân
+SELECT w.name AS worker_name, SUM(wo.total) AS total_days
+FROM worker w
+JOIN work wo ON w.id = wo.worker_id
+GROUP BY w.id
+HAVING SUM(wo.total) > (
+    SELECT SUM(wo2.total)
+    FROM worker w2
+    JOIN work wo2 ON w2.id = wo2.worker_id
+    WHERE w2.name = 'Nguyễn Hồng Vân'
+);
+
+-- Cho biết tổng số công trình mà mỗi chủ thầu đã thi công tại mỗi thành phố
+SELECT c.name AS contractor_name, b.city AS city_name, COUNT(b.id) AS total_buildings
+FROM contractor c
+JOIN building b ON c.id = b.contractor_id
+GROUP BY c.name, b.city;
+
+-- 
+
+
+
+-- 
+
